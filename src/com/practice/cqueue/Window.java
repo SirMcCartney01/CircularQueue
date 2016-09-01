@@ -8,10 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JTextField;
 import javax.swing.JOptionPane;
 
-import java.awt.Dimension;
-import java.awt.Container;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import java.awt.*;
 
 public class Window extends JFrame {
 
@@ -31,14 +28,24 @@ public class Window extends JFrame {
         Container container = frame.getContentPane();
         container.setLayout(new BorderLayout());
 
-        int queueLength;
-        do {
-            queueLength = Integer.parseInt(JOptionPane.showInputDialog(null, "Ingrese la dimension de la Cola"));
-            if (queueLength <= 0)
-                JOptionPane.showMessageDialog(null, "Error: La logitud debe ser mayor a cero", "Error",
-                        JOptionPane.ERROR_MESSAGE);
-        } while (queueLength <= 0);
+        //Validates if the queue dimension is a valid positive integer
 
+        int queueLength = 0;
+        boolean error;
+        do {
+            try{
+                queueLength = Integer.parseInt(JOptionPane.showInputDialog(null, "Ingrese la dimension de la Cola"));
+                if (queueLength <= 0)
+                    error = true;
+                else
+                    error = false;
+            }
+            catch(Exception e){
+                error = true;
+            }
+            if(error)
+                JOptionPane.showMessageDialog(null,"La dimension tiene que ser un entero positivo","Error!",JOptionPane.ERROR_MESSAGE);
+        } while (error);
         queue = new CQueue(queueLength);
         CirclePanel circlePanel = new CirclePanel(queueLength);
 
@@ -49,15 +56,35 @@ public class Window extends JFrame {
         JButton buttonEnqueue = new JButton("Encolar");
         JButton buttonDequeue = new JButton("Desencolar");
 
-        buttonEnqueue.addActionListener(e -> {
-            int dataToQueue = Integer.parseInt(dataField.getText());
-            queue.enqueue(dataToQueue);
 
-            dataField.setText(null);
-            System.out.println("Dato encolado: " + dataToQueue);
+
+        buttonEnqueue.addActionListener(e -> {
+            boolean failure;
+
+            if(dataField.getText().isEmpty()){
+                failure = true;
+            }
+            else {
+                try {
+                    int dataToQueue = Integer.parseInt(dataField.getText());
+                    queue.enqueue(dataToQueue);
+                    System.out.println("Dato encolado: " + dataToQueue);
+                    failure = false;
+                } catch (Exception ex) {
+                    failure = true;
+                }
+                dataField.setText(null);
+            }
+            if(failure)
+                JOptionPane.showMessageDialog(null, "Tiene que agregar un entero!", "Error", JOptionPane.ERROR_MESSAGE);
         });
 
-        buttonDequeue.addActionListener(e -> System.out.println("Dato desencolado: " + queue.dequeue()));
+
+        buttonDequeue.addActionListener(e -> {
+            if(queue.dequeue()!=-1){
+                System.out.println("Elemento desencolado "+queue.dequeue());
+            }
+        });
 
         widgetsPane.add(dataLabel);
         widgetsPane.add(dataField);
